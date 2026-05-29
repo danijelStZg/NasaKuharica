@@ -24,7 +24,7 @@
   :root {
     --red: #E30613;
     --red-dark: #B30410;
-    --bg-app: #F4F5F7;
+    --bg-app: #EBECEF;
     --bg-card: #FFFFFF;
     --bg-card-2: #F0F1F4;
     --bg-input: #FFFFFF;
@@ -54,14 +54,14 @@
   }
 
   header {
-    background: var(--red);
-    color: var(--text-on-red);
+    background: var(--bg-header);
+    color: var(--text-primary);
     padding: 18px 16px 14px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px var(--shadow);
-    border-bottom: 3px solid var(--red-dark);
+    box-shadow: 0 1px 0 var(--divider);
+    border-bottom: none;
   }
 
   .menu-btn {
@@ -70,41 +70,43 @@
     top: 18px;
     background: transparent;
     border: none;
-    color: var(--text-on-red);
+    color: var(--text-secondary);
     font-size: 26px;
     cursor: pointer;
     padding: 4px 10px;
   }
 
   header h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 26px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
     text-align: center;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
 
   .counter {
     text-align: center;
-    font-family: 'Caveat', cursive;
-    font-size: 26px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
     font-weight: 600;
-    color: #FFFFFF;
-    margin-top: 4px;
-    min-height: 30px;
+    color: var(--red);
+    margin-top: 6px;
+    min-height: 20px;
   }
 
   .search-bar {
-    margin-top: 12px;
+    margin-top: 14px;
     position: relative;
   }
 
   .search-bar input {
     width: 100%;
-    padding: 10px 16px 10px 40px;
-    border: 1px solid transparent;
+    padding: 11px 16px 11px 40px;
+    border: 1px solid var(--border);
     border-radius: 22px;
-    background: #FFFFFF;
+    background: var(--bg-card-2);
     color: var(--text-primary);
     font-family: inherit;
     font-size: 15px;
@@ -112,7 +114,7 @@
   }
 
   .search-bar input::placeholder { color: var(--text-tertiary); }
-  .search-bar input:focus { border-color: var(--red-dark); box-shadow: 0 0 0 2px rgba(255,255,255,0.5); }
+  .search-bar input:focus { border-color: var(--red); background: #FFFFFF; box-shadow: 0 0 0 2px rgba(227,6,19,0.12); }
 
   .search-bar::before {
     content: '🔍';
@@ -138,9 +140,9 @@
   .filter-chip {
     flex-shrink: 0;
     padding: 5px 14px;
-    background: rgba(255,255,255,0.15);
-    color: #FFFFFF;
-    border: 1px solid rgba(255,255,255,0.45);
+    background: var(--bg-card-2);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
     border-radius: 14px;
     font-size: 12px;
     font-family: inherit;
@@ -150,9 +152,9 @@
   }
 
   .filter-chip.active {
-    background: #FFFFFF;
-    color: var(--red);
-    border-color: #FFFFFF;
+    background: var(--red);
+    color: #FFFFFF;
+    border-color: var(--red);
     font-weight: 600;
   }
 
@@ -190,21 +192,20 @@
 
   .recipe-card {
     background: var(--bg-card);
-    border-radius: 8px;
-    padding: 16px 18px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--red);
-    box-shadow: 0 2px 6px var(--shadow);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border: none;
+    box-shadow: 0 4px 16px var(--shadow);
     cursor: pointer;
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
 
-  .recipe-card:active { transform: scale(0.98); background: var(--bg-card-2); }
+  .recipe-card:active { transform: scale(0.98); box-shadow: 0 2px 8px var(--shadow); }
 
   .recipe-card h3 {
     font-family: 'Cormorant Garamond', serif;
@@ -287,15 +288,15 @@
 
   .modal-header {
     padding: 14px 16px;
-    background: var(--red);
-    color: var(--text-on-red);
+    background: var(--bg-header);
+    color: var(--text-primary);
     position: sticky;
     top: 0;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 3px solid var(--red-dark);
+    border-bottom: 1px solid var(--divider);
   }
 
   .modal-header h2 {
@@ -304,12 +305,13 @@
     font-weight: 600;
     flex: 1;
     text-align: center;
+    color: var(--text-primary);
   }
 
   .close-btn, .action-btn {
     background: transparent;
     border: none;
-    color: var(--text-on-red);
+    color: var(--text-secondary);
     font-size: 22px;
     cursor: pointer;
     padding: 4px 10px;
@@ -654,7 +656,7 @@
     <div class="modal-header">
       <button class="close-btn" onclick="closeModal('editModal')">✕</button>
       <h2 id="editTitle">Novi recept</h2>
-      <button class="action-btn" onclick="saveRecipe()">✓</button>
+      <button class="action-btn" onclick="saveRecipe()" style="color:var(--red);font-weight:700">✓</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
