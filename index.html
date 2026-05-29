@@ -139,7 +139,10 @@
 
   .filter-chip {
     flex-shrink: 0;
-    padding: 5px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px 5px 14px;
     background: var(--bg-card-2);
     color: var(--text-secondary);
     border: 1px solid var(--border);
@@ -156,6 +159,26 @@
     color: #FFFFFF;
     border-color: var(--red);
     font-weight: 600;
+  }
+
+  .chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--red);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .filter-chip.active .chip-count {
+    background: #FFFFFF;
+    color: var(--red);
   }
 
   .container {
@@ -744,15 +767,16 @@
   function renderCategoryFilters() {
     const container = document.getElementById('categoryFilters');
     const cats = [...new Set(recipes.map(r => r.category).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'hr'));
-    let html = `<button class="filter-chip ${activeCategory === 'sve' ? 'active' : ''}" onclick="setCategory('sve')">Sve</button>`;
+    const countFor = (c) => recipes.filter(r => r.category === c).length;
+    let html = `<button class="filter-chip ${activeCategory === 'sve' ? 'active' : ''}" onclick="setCategory('sve')">Sve<span class="chip-count">${recipes.length}</span></button>`;
     cats.forEach(c => {
       const active = activeCategory === c ? 'active' : '';
-      html += `<button class="filter-chip ${active}" onclick="setCategory('${escapeAttr(c)}')">${escapeHtml(c)}</button>`;
+      html += `<button class="filter-chip ${active}" onclick="setCategory('${escapeAttr(c)}')">${escapeHtml(c)}<span class="chip-count">${countFor(c)}</span></button>`;
     });
-    const hasUncat = recipes.some(r => !r.category);
-    if (hasUncat) {
+    const uncatCount = recipes.filter(r => !r.category).length;
+    if (uncatCount > 0) {
       const active = activeCategory === '__none__' ? 'active' : '';
-      html += `<button class="filter-chip ${active}" onclick="setCategory('__none__')">Bez kategorije</button>`;
+      html += `<button class="filter-chip ${active}" onclick="setCategory('__none__')">Bez kategorije<span class="chip-count">${uncatCount}</span></button>`;
     }
     container.innerHTML = html;
   }
