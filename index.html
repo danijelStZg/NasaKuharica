@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kuharica">
+<meta name="color-scheme" content="light">
 <title>Naša Kuharica</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600&display=swap');
@@ -626,6 +627,27 @@
   .toast.show { opacity: 1; }
 
   #fileInput { display: none; }
+
+  /* Drži aplikaciju svijetlom i kad je sustav u tamnom načinu */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-app: #EBECEF;
+      --bg-card: #FFFFFF;
+      --bg-card-2: #F0F1F4;
+      --bg-header: #FFFFFF;
+      --bg-modal: #FFFFFF;
+      --bg-elevated: #FFFFFF;
+      --bg-input: #FFFFFF;
+      --bg-input-focus: #FFFFFF;
+      --bg-note: #FFF4F4;
+      --text-primary: #1F2933;
+      --text-secondary: #52606D;
+      --text-tertiary: #9AA5B1;
+      --border: #D9DEE5;
+      --border-light: #CBD2D9;
+      --divider: #EAECEF;
+    }
+  }
 </style>
 </head>
 <body>
