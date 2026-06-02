@@ -678,18 +678,18 @@
     animation:splashRise 0.7s ease 0.35s forwards;
   }
   #splash .s-tag {
-    font-family:'Caveat',cursive; font-size:24px; color:rgba(255,255,255,0.9); margin-top:4px;
+    font-family:'Caveat',cursive; font-size:30px; color:rgba(255,255,255,0.9); margin-top:6px;
     opacity:0; transform:translateY(14px);
     animation:splashRise 0.7s ease 0.55s forwards;
   }
   #splash .s-team {
-    font-family:'Caveat',cursive; font-style:italic; font-size:19px;
-    color:rgba(255,255,255,0.82); margin-top:6px; letter-spacing:0.5px;
-    transform:rotate(-3deg); min-height:24px;
+    font-family:'Caveat',cursive; font-style:italic; font-size:24px;
+    color:rgba(255,255,255,0.82); margin-top:18px; letter-spacing:0.5px;
+    transform:rotate(-3deg); min-height:30px;
     display:flex; align-items:center;
   }
   #splash .s-team .pen {
-    display:inline-block; width:2px; height:20px; margin-left:1px;
+    display:inline-block; width:2px; height:24px; margin-left:1px;
     background:rgba(255,255,255,0.9);
     animation:penBlink 0.7s step-end infinite;
   }
@@ -706,6 +706,48 @@
   @keyframes splashRise { to { opacity:1; transform:translateY(0); } }
   @keyframes splashFade { to { opacity:1; } }
   @keyframes splashPulse { 0%,100%{ transform:scale(1); opacity:0.85; } 50%{ transform:scale(1.05); opacity:1; } }
+
+  /* ===== O APLIKACIJI (popup u stilu splasha) ===== */
+  #aboutScreen {
+    position:fixed; inset:0; z-index:9998;
+    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    overflow:hidden; text-align:center; padding:30px;
+    opacity:0; transition:opacity 0.35s ease;
+  }
+  #aboutScreen.show { display:flex; opacity:1; }
+  #aboutScreen::before, #aboutScreen::after {
+    content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,0.07);
+  }
+  #aboutScreen::before { width:300px; height:300px; top:-90px; right:-90px; }
+  #aboutScreen::after { width:220px; height:220px; bottom:-60px; left:-60px; }
+  #aboutScreen .logo-wrap {
+    width:108px; height:108px; border-radius:28px;
+    background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3);
+    display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+  }
+  #aboutScreen .logo-wrap .icon { font-size:54px; line-height:1; }
+  #aboutScreen .a-title {
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:40px; color:#fff; letter-spacing:0.5px;
+  }
+  #aboutScreen .a-desc {
+    font-family:'Inter',sans-serif; font-size:15px; line-height:1.65;
+    color:rgba(255,255,255,0.92); max-width:360px; margin-top:16px;
+  }
+  #aboutScreen .a-tag {
+    font-family:'Caveat',cursive; font-size:30px; color:rgba(255,255,255,0.92); margin-top:24px;
+  }
+  #aboutScreen .a-team {
+    font-family:'Caveat',cursive; font-style:italic; font-size:24px;
+    color:rgba(255,255,255,0.82); margin-top:8px; transform:rotate(-3deg);
+  }
+  #aboutScreen .a-close {
+    margin-top:44px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+    letter-spacing:2px; text-transform:uppercase; color:#fff; cursor:pointer;
+    padding:12px 30px; border:1.5px solid rgba(255,255,255,0.5); border-radius:30px;
+    background:transparent;
+  }
+  #aboutScreen .a-close:active { background:rgba(255,255,255,0.12); }
 </style>
 </head>
 <body>
@@ -716,6 +758,15 @@
   <div class="s-tag">S ljubavlju kuhano</div>
   <div class="s-team"><span id="teamText"></span><span class="pen" id="teamPen"></span></div>
   <div class="s-touch">Dodirni za početak</div>
+</div>
+
+<div id="aboutScreen" onclick="if(event.target===this)closeAbout()">
+  <div class="logo-wrap"><span class="icon">🍴</span></div>
+  <div class="a-title">Naša Kuharica</div>
+  <div class="a-desc">Digitalna zbirka recepata.<br><br>Ova aplikacija nastavlja tradiciju dijeljenja recepata započetu među kolegama u Croatia banci, s ciljem očuvanja omiljenih jela i uspomena.<br><br>Recepti se pohranjuju lokalno na vašem uređaju uz mogućnost sinkronizacije putem oblaka.</div>
+  <div class="a-tag">S ljubavlju kuhano</div>
+  <div class="a-team">…od ekipe iz CB</div>
+  <button class="a-close" onclick="closeAbout()">Zatvori</button>
 </div>
 
 <header>
@@ -757,7 +808,7 @@
     <div class="drawer-item" onclick="reloadFromInternet()">
       <span class="icon">🔄</span> Ponovno učitaj app s interneta
     </div>
-    <div class="drawer-item" onclick="closeDrawer(); setTimeout(()=>alert('Naša Kuharica\n\nAplikacija za vaše recepte.\n\nRecepti se čuvaju lokalno i sinkroniziraju preko oblaka.'), 100)">
+    <div class="drawer-item" onclick="openAbout()">
       <span class="icon">ℹ️</span> O aplikaciji
     </div>
   </div>
@@ -1629,6 +1680,21 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       console.warn('Generiranje QR koda nije uspjelo:', e);
       showToast('Greška pri generiranju QR koda');
     }
+  }
+
+  // Otvara/zatvara "O aplikaciji" popup u stilu splasha
+  function openAbout() {
+    closeDrawer();
+    const a = document.getElementById('aboutScreen');
+    if (!a) return;
+    a.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeAbout() {
+    const a = document.getElementById('aboutScreen');
+    if (!a) return;
+    a.classList.remove('show');
+    document.body.style.overflow = '';
   }
 
   // Splash ostaje dok korisnik ne dodirne ekran
