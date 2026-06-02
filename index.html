@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kuharica">
-<meta name="color-scheme" content="light only">
+<meta name="color-scheme" content="light dark">
 <title>Naša Kuharica</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600&display=swap');
@@ -23,7 +23,7 @@
   }
 
   :root {
-    color-scheme: light only;
+    color-scheme: light dark;
     --red: #E30613;
     --red-dark: #B30410;
     --bg-app: #EBECEF;
@@ -46,9 +46,30 @@
     --shadow-strong: rgba(31, 41, 51, 0.18);
   }
 
+  /* Tamna tema — srednje sive nijanse */
+  [data-theme="dark"] {
+    --bg-app: #2B2E33;
+    --bg-card: #383C42;
+    --bg-card-2: #42464D;
+    --bg-input: #42464D;
+    --bg-input-focus: #4A4F57;
+    --bg-header: #33363B;
+    --bg-modal: #383C42;
+    --bg-elevated: #3E4248;
+    --bg-note: #4A3A3B;
+    --text-primary: #F2F3F5;
+    --text-secondary: #C2C7CF;
+    --text-tertiary: #9AA0A8;
+    --text-on-red: #FFFFFF;
+    --border: #4E535B;
+    --border-light: #565C64;
+    --divider: #45494F;
+    --shadow: rgba(0, 0, 0, 0.25);
+    --shadow-strong: rgba(0, 0, 0, 0.4);
+  }
+
   html {
-    color-scheme: light only;
-    forced-color-adjust: none;
+    color-scheme: light dark;
   }
 
   body {
@@ -634,26 +655,7 @@
 
   #fileInput { display: none; }
 
-  /* Drži aplikaciju svijetlom i kad je sustav u tamnom načinu */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg-app: #EBECEF;
-      --bg-card: #FFFFFF;
-      --bg-card-2: #F0F1F4;
-      --bg-header: #FFFFFF;
-      --bg-modal: #FFFFFF;
-      --bg-elevated: #FFFFFF;
-      --bg-input: #FFFFFF;
-      --bg-input-focus: #FFFFFF;
-      --bg-note: #FFF4F4;
-      --text-primary: #1F2933;
-      --text-secondary: #52606D;
-      --text-tertiary: #9AA5B1;
-      --border: #D9DEE5;
-      --border-light: #CBD2D9;
-      --divider: #EAECEF;
-    }
-  }
+  /* Tema se bira ručno (gumb u izborniku), pa ne pratimo prefers-color-scheme. */
   /* ===== SPLASH SCREEN ===== */
   #splash {
     position:fixed; inset:0; z-index:9999;
@@ -876,6 +878,9 @@
   <div class="drawer-content">
     <div class="drawer-header">
       <h2>Izbornik</h2>
+    </div>
+    <div class="drawer-item" onclick="toggleTheme()">
+      <span class="icon" id="themeIcon">🌙</span> <span id="themeLabel">Tamna tema</span>
     </div>
     <div class="drawer-item" onclick="exportAll()">
       <span class="icon">📤</span> Izvoz svih recepata
@@ -1847,6 +1852,31 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       }
     })();
   }
+  // ===== Tamna / svijetla tema (ručno prebacivanje) =====
+  function applyTheme(theme) {
+    const dark = theme === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    const icon = document.getElementById('themeIcon');
+    const label = document.getElementById('themeLabel');
+    if (icon) icon.textContent = dark ? '☀️' : '🌙';
+    if (label) label.textContent = dark ? 'Svijetla tema' : 'Tamna tema';
+    // uskladi boju statusne trake
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#33363B' : '#E30613');
+  }
+  function toggleTheme() {
+    const sada = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const novo = sada === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem('tema', novo); } catch(e) {}
+    applyTheme(novo);
+  }
+  // Primijeni spremljenu temu pri pokretanju (zadano: svijetla)
+  (function initTheme() {
+    let t = 'light';
+    try { t = localStorage.getItem('tema') || 'light'; } catch(e) {}
+    applyTheme(t);
+  })();
+
   // Pokreni pisanje nakon što se ostali elementi pojave
   if (document.getElementById('teamText')) setTimeout(pisiPotpis, 1150);
 
