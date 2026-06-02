@@ -654,6 +654,47 @@
       --divider: #EAECEF;
     }
   }
+
+  /* ===== Obrana protiv "force dark" (Samsung Internet i sl.) =====
+     Ovi preglednici nasilno mijenjaju boje neovisno o CSS varijablama.
+     Eksplicitne boje s !important ih najuspješnije zaustavljaju. */
+  html, body {
+    background-color: #EBECEF !important;
+    color: #1F2933 !important;
+  }
+
+  /* Fiksne boje glavnih elemenata (otpornost na force-dark) */
+  header { background-color: #FFFFFF !important; }
+  header h1 { color: #52606D !important; }
+  .menu-btn { color: #52606D !important; }
+  .search-bar input {
+    background-color: #F0F1F4 !important;
+    color: #1F2933 !important;
+    border-color: #D9DEE5 !important;
+  }
+  .search-bar input:focus { background-color: #FFFFFF !important; }
+  .filter-chip {
+    background-color: #F0F1F4 !important;
+    color: #52606D !important;
+    border-color: #D9DEE5 !important;
+  }
+  .filter-chip.active {
+    background-color: #E30613 !important;
+    color: #FFFFFF !important;
+  }
+  .recipe-card {
+    background-color: #FFFFFF !important;
+  }
+  .recipe-card h3 { color: #1F2933 !important; }
+  .modal-content, .drawer-content, .action-sheet-content {
+    background-color: #FFFFFF !important;
+    color: #1F2933 !important;
+  }
+  .btn.secondary { background-color: #F0F1F4 !important; color: #1F2933 !important; }
+  input, textarea, select {
+    background-color: #FFFFFF !important;
+    color: #1F2933 !important;
+  }
   /* ===== SPLASH SCREEN ===== */
   #splash {
     position:fixed; inset:0; z-index:9999;
