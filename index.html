@@ -748,6 +748,44 @@
     background:transparent;
   }
   #aboutScreen .a-close:active { background:rgba(255,255,255,0.12); }
+
+  /* ===== POTVRDNI POPUP (u stilu splasha, s dva gumba) ===== */
+  #confirmScreen {
+    position:fixed; inset:0; z-index:9998;
+    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    overflow:hidden; text-align:center; padding:30px;
+    opacity:0; transition:opacity 0.35s ease;
+  }
+  #confirmScreen.show { display:flex; opacity:1; }
+  #confirmScreen::before, #confirmScreen::after {
+    content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,0.07);
+  }
+  #confirmScreen::before { width:300px; height:300px; top:-90px; right:-90px; }
+  #confirmScreen::after { width:220px; height:220px; bottom:-60px; left:-60px; }
+  #confirmScreen .c-icon { font-size:54px; margin-bottom:18px; }
+  #confirmScreen .c-title {
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:#fff;
+    letter-spacing:0.5px; max-width:340px;
+  }
+  #confirmScreen .c-text {
+    font-family:'Inter',sans-serif; font-size:15px; line-height:1.65;
+    color:rgba(255,255,255,0.92); max-width:360px; margin-top:16px;
+  }
+  #confirmScreen .c-buttons { display:flex; gap:12px; margin-top:36px; flex-wrap:wrap; justify-content:center; }
+  #confirmScreen button {
+    font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+    letter-spacing:1.5px; text-transform:uppercase; cursor:pointer;
+    padding:13px 28px; border-radius:30px;
+  }
+  #confirmScreen .c-yes {
+    background:#fff; color:#E30613; border:none;
+  }
+  #confirmScreen .c-yes:active { background:rgba(255,255,255,0.85); }
+  #confirmScreen .c-no {
+    background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.5);
+  }
+  #confirmScreen .c-no:active { background:rgba(255,255,255,0.12); }
 </style>
 </head>
 <body>
@@ -767,6 +805,16 @@
   <div class="a-tag">S ljubavlju kuhano</div>
   <div class="a-team">…od ekipe iz CB</div>
   <button class="a-close" onclick="closeAbout()">Zatvori</button>
+</div>
+
+<div id="confirmScreen">
+  <div class="c-icon" id="confirmIcon">⬆️</div>
+  <div class="c-title" id="confirmTitle"></div>
+  <div class="c-text" id="confirmText"></div>
+  <div class="c-buttons">
+    <button class="c-no" id="confirmNo">Odustani</button>
+    <button class="c-yes" id="confirmYes">Nastavi</button>
+  </div>
 </div>
 
 <header>
@@ -806,7 +854,7 @@
       <span class="icon">📲</span> Instaliraj na drugi uređaj (QR)
     </div>
     <div class="drawer-item" onclick="reloadFromInternet()">
-      <span class="icon">🔄</span> Ponovno učitaj app s interneta
+      <span class="icon">🔄</span> Ponovno učitaj aplikaciju
     </div>
     <div class="drawer-item" onclick="openAbout()">
       <span class="icon">ℹ️</span> O aplikaciji
@@ -1547,11 +1595,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     closeDrawer();
     if (!cloudReady()) return;
     if (recipes.length === 0) { showToast('Nema recepata za slanje'); return; }
-    const upozorenje = 'Napomena: app automatski šalje svaki recept u oblak kad ga spremite.\n\n' +
-      'Ova opcija šalje SVE recepte odjednom i potrebna je samo u posebnim slučajevima ' +
-      '(npr. prvo postavljanje ili ako sumnjate da neki stari recept nije stigao u oblak).\n\n' +
-      'Želite li nastaviti?';
-    if (!confirm(upozorenje)) return;
+    const nastavi = await splashConfirm({
+      icon: '⬆️',
+      title: 'Pošalji sve u oblak',
+      text: 'Aplikacija automatski šalje svaki recept u oblak kad ga spremite.<br><br>' +
+            'Ova opcija šalje sve recepte odjednom i potrebna je samo u posebnim slučajevima ' +
+            '(npr. prvo postavljanje ili ako sumnjate da neki stariji recept nije stigao u oblak).',
+      yes: 'Pošalji sve',
+      no: 'Odustani'
+    });
+    if (!nastavi) return;
     showToast('Slanje u oblak...');
     let ok = 0;
     for (const r of recipes) {
@@ -1623,11 +1676,18 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     }
   }
 
-  // Prisilno povuče najnoviju verziju app s interneta.
-  // Briše SAMO cache app datoteka — recepti (localStorage) ostaju netaknuti.
+  // Prisilno povuče najnoviju verziju aplikacije s interneta.
+  // Briše SAMO cache datoteka aplikacije — recepti (localStorage) ostaju netaknuti.
   async function reloadFromInternet() {
     closeDrawer();
-    if (!confirm('Ponovno učitati aplikaciju s interneta?\n\nPovlači se najnovija verzija app.\nVaši recepti ostaju sačuvani.')) return;
+    const nastavi = await splashConfirm({
+      icon: '🔄',
+      title: 'Ponovno učitaj aplikaciju',
+      text: 'Povlači se najnovija verzija aplikacije s interneta.<br><br>Vaši recepti ostaju sačuvani.',
+      yes: 'Učitaj ponovno',
+      no: 'Odustani'
+    });
+    if (!nastavi) return;
     showToast('Učitavam najnoviju verziju...');
     try {
       // 1. Obriši sve cache verzije
@@ -1695,6 +1755,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     if (!a) return;
     a.classList.remove('show');
     document.body.style.overflow = '';
+  }
+
+  // Potvrdni popup u stilu splasha; vraća Promise<boolean>
+  function splashConfirm({ icon = 'ℹ️', title = '', text = '', yes = 'Nastavi', no = 'Odustani' }) {
+    return new Promise((resolve) => {
+      const screen = document.getElementById('confirmScreen');
+      document.getElementById('confirmIcon').textContent = icon;
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmText').innerHTML = text;
+      const btnYes = document.getElementById('confirmYes');
+      const btnNo = document.getElementById('confirmNo');
+      btnYes.textContent = yes;
+      btnNo.textContent = no;
+      screen.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      function zatvori(odgovor) {
+        screen.classList.remove('show');
+        document.body.style.overflow = '';
+        btnYes.onclick = null; btnNo.onclick = null;
+        resolve(odgovor);
+      }
+      btnYes.onclick = () => zatvori(true);
+      btnNo.onclick = () => zatvori(false);
+    });
   }
 
   // Splash ostaje dok korisnik ne dodirne ekran
