@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Kuharica">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light only">
 <title>Naša Kuharica</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Caveat:wght@600&display=swap');
@@ -23,6 +23,7 @@
   }
 
   :root {
+    color-scheme: light only;
     --red: #E30613;
     --red-dark: #B30410;
     --bg-app: #EBECEF;
@@ -43,6 +44,11 @@
     --divider: #EAECEF;
     --shadow: rgba(31, 41, 51, 0.08);
     --shadow-strong: rgba(31, 41, 51, 0.18);
+  }
+
+  html {
+    color-scheme: light only;
+    forced-color-adjust: none;
   }
 
   body {
@@ -710,7 +716,7 @@
   /* ===== O APLIKACIJI (popup u stilu splasha) ===== */
   #aboutScreen {
     position:fixed; inset:0; z-index:9998;
-    background:rgba(31,20,18,0.55);
+    background:rgba(31,20,18,0.35);
     display:none; align-items:center; justify-content:center;
     padding:20px;
     opacity:0; transition:opacity 0.3s ease;
@@ -721,7 +727,7 @@
     width:100%; max-width:380px;
     background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
     border-radius:26px;
-    box-shadow:0 24px 70px rgba(0,0,0,0.45);
+    box-shadow:0 20px 60px rgba(140,4,12,0.4);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:38px 28px;
     transform:scale(0.92); transition:transform 0.3s cubic-bezier(0.2,0.8,0.3,1.2);
@@ -768,7 +774,7 @@
   /* ===== POTVRDNI POPUP (crvena kartica u sredini, s dva gumba) ===== */
   #confirmScreen {
     position:fixed; inset:0; z-index:9998;
-    background:rgba(31,20,18,0.55);
+    background:rgba(31,20,18,0.35);
     display:none; align-items:center; justify-content:center;
     padding:20px;
     opacity:0; transition:opacity 0.3s ease;
@@ -779,7 +785,7 @@
     width:100%; max-width:380px;
     background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
     border-radius:26px;
-    box-shadow:0 24px 70px rgba(0,0,0,0.45);
+    box-shadow:0 20px 60px rgba(140,4,12,0.4);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding:38px 28px;
     transform:scale(0.92); transition:transform 0.3s cubic-bezier(0.2,0.8,0.3,1.2);
