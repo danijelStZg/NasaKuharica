@@ -1031,20 +1031,204 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     return txt;
   }
 
+  // Crta tekst s automatskim prelamanjem; vraća novu y poziciju
+  function crtajTekst(ctx, tekst, x, y, maxW, lineH) {
+    const paragrafi = String(tekst).split('\n');
+    for (const para of paragrafi) {
+      if (para.trim() === '') { y += lineH * 0.5; continue; }
+      const rijeci = para.split(' ');
+      let linija = '';
+      for (const rijec of rijeci) {
+        const test = linija ? linija + ' ' + rijec : rijec;
+        if (ctx.measureText(test).width > maxW && linija) {
+          ctx.fillText(linija, x, y);
+          y += lineH;
+          linija = rijec;
+        } else {
+          linija = test;
+        }
+      }
+      if (linija) { ctx.fillText(linija, x, y); y += lineH; }
+    }
+    return y;
+  }
+
+  // Generira sliku kartice recepta i vraća Blob (PNG)
+  async function generirajKarticu(r) {
+    // Učitaj fontove prije crtanja (da canvas koristi Cormorant/Inter)
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; } catch(e) {}
+
+    const W = 840;            // širina slike (2x za oštrinu)
+    const pad = 56;           // unutarnji rub
+    const contentW = W - pad * 2;
+
+    // --- Mjerenje visine: prvo "probni" canvas da izračunamo ukupnu visinu ---
+    const measure = document.createElement('canvas').getContext('2d');
+    function visinaBloka(tekst, font, lineH, maxW) {
+      measure.font = font;
+      let h = 0;
+      for (const para of String(tekst).split('\n')) {
+        if (para.trim() === '') { h += lineH * 0.5; continue; }
+        const rijeci = para.split(' ');
+        let linija = '';
+        for (const rijec of rijeci) {
+          const test = linija ? linija + ' ' + rijec : rijec;
+          if (measure.measureText(test).width > maxW && linija) { h += lineH; linija = rijec; }
+          else linija = test;
+        }
+        if (linija) h += lineH;
+      }
+      return h;
+    }
+
+    const headerH = 220;
+    let bodyH = 40;
+    const fSekcija = '700 38px "Cormorant Garamond", serif';
+    const fTekst = '400 27px "Inter", sans-serif';
+    const lineH = 38;
+
+    const imaSastojci = r.ingredients && r.ingredients.trim();
+    const imaPriprema = r.preparation && r.preparation.trim();
+    const imaNapomena = r.note && r.note.trim();
+
+    if (imaSastojci) { bodyH += 60 + visinaBloka(r.ingredients, fTekst, lineH, contentW) + 30; }
+    if (imaPriprema) { bodyH += 60 + visinaBloka(r.preparation, fTekst, lineH, contentW) + 30; }
+    if (imaNapomena) { bodyH += 50 + visinaBloka(r.note, '400 26px "Inter",sans-serif', 36, contentW - 40) + 36; }
+    const footH = 96;
+    const H = headerH + bodyH + footH;
+
+    // --- Pravi canvas ---
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // pozadina
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, W, H);
+
+    // crveni header (gradijent)
+    const grad = ctx.createLinearGradient(0, 0, W, headerH);
+    grad.addColorStop(0, '#E30613');
+    grad.addColorStop(1, '#B30410');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, headerH);
+
+    // dekorativni krug
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.beginPath(); ctx.arc(W - 60, 40, 150, 0, Math.PI * 2); ctx.fill();
+
+    // brand
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = '600 22px "Inter", sans-serif';
+    ctx.fillText('NAŠA KUHARICA', pad, 56);
+
+    // naslov recepta (može u dva reda)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '700 56px "Cormorant Garamond", serif';
+    let ty = crtajTekst(ctx, r.name, pad, 110, contentW - 20, 58);
+
+    // kategorija
+    if (r.category) {
+      ctx.font = '600 22px "Inter", sans-serif';
+      const catW = ctx.measureText(r.category).width + 36;
+      const cy = Math.min(ty + 6, headerH - 46);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(pad, cy, catW, 38, 19); ctx.fill(); }
+      else ctx.fillRect(pad, cy, catW, 38);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(r.category, pad + 18, cy + 26);
+    }
+
+    // tijelo
+    let y = headerH + 60;
+    function sekcijaNaslov(naslov) {
+      ctx.fillStyle = '#E30613';
+      ctx.beginPath(); ctx.arc(pad + 6, y - 12, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1F2933';
+      ctx.font = fSekcija;
+      ctx.fillText(naslov, pad + 24, y);
+      y += 48;
+    }
+
+    if (imaSastojci) {
+      sekcijaNaslov('Sastojci');
+      ctx.fillStyle = '#3A4450'; ctx.font = fTekst;
+      y = crtajTekst(ctx, r.ingredients, pad, y, contentW, lineH);
+      y += 36;
+    }
+    if (imaPriprema) {
+      sekcijaNaslov('Priprema');
+      ctx.fillStyle = '#3A4450'; ctx.font = fTekst;
+      y = crtajTekst(ctx, r.preparation, pad, y, contentW, lineH);
+      y += 36;
+    }
+    if (imaNapomena) {
+      const noteTop = y - 28;
+      const noteH = visinaBloka(r.note, '400 26px "Inter",sans-serif', 36, contentW - 40) + 44;
+      ctx.fillStyle = '#FFF4F4';
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(pad, noteTop, contentW, noteH, 12); ctx.fill(); }
+      else ctx.fillRect(pad, noteTop, contentW, noteH);
+      ctx.fillStyle = '#E30613';
+      ctx.fillRect(pad, noteTop, 4, noteH);
+      ctx.fillStyle = '#E30613';
+      ctx.font = '600 30px "Caveat", cursive';
+      ctx.fillText('Napomena', pad + 24, noteTop + 32);
+      ctx.fillStyle = '#52606D';
+      ctx.font = '400 26px "Inter", sans-serif';
+      crtajTekst(ctx, r.note, pad + 24, noteTop + 68, contentW - 48, 36);
+      y = noteTop + noteH + 40;
+    }
+
+    // podnožje
+    const fy = H - footH;
+    ctx.strokeStyle = '#EAECEF'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, fy); ctx.lineTo(W - pad, fy); ctx.stroke();
+    ctx.fillStyle = '#9AA5B1';
+    ctx.font = '600 34px "Caveat", cursive';
+    ctx.fillText('S ljubavlju kuhano', pad, fy + 52);
+    ctx.fillStyle = '#E30613';
+    ctx.font = '700 20px "Inter", sans-serif';
+    const logo = 'NAŠA KUHARICA';
+    ctx.fillText(logo, W - pad - ctx.measureText(logo).width, fy + 50);
+
+    return await new Promise(res => canvas.toBlob(res, 'image/png'));
+  }
+
   async function shareCurrent() {
     closeActionSheet();
     const r = recipes.find(x => x.id === currentId);
     if (!r) return;
-    const text = formatRecipeText(r);
+    showToast('Pripremam karticu...');
+    try {
+      const blob = await generirajKarticu(r);
+      if (!blob) throw new Error('Blob nije stvoren');
+      const file = new File([blob], `${r.name.replace(/[^\wčćžšđČĆŽŠĐ ]/g,'').trim() || 'recept'}.png`, { type: 'image/png' });
 
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: r.name, text: text });
-      } catch(e) {
-        if (e.name !== 'AbortError') fallbackShare(r, text);
+      // Dijeljenje slike (ako uređaj podržava)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: r.name });
+        return;
       }
-    } else {
-      fallbackShare(r, text);
+      // Inače: ponudi spremanje/pregled slike
+      const url = URL.createObjectURL(blob);
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px;overflow:auto';
+      modal.innerHTML =
+        `<img src="${url}" style="max-width:100%;max-height:70vh;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.4)">
+         <a href="${url}" download="${file.name}" style="padding:14px 24px;background:#25D366;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;font-family:inherit">⬇️ Spremi sliku</a>
+         <p style="color:#fff;font-size:13px;text-align:center;max-width:320px;opacity:0.85">Spremite sliku pa je pošaljite kao fotografiju na WhatsApp ili Viber.</p>
+         <button style="padding:12px 24px;background:transparent;border:1px solid #fff;color:#fff;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer">Zatvori</button>`;
+      modal.querySelector('button').onclick = () => { URL.revokeObjectURL(url); modal.remove(); };
+      modal.onclick = (e) => { if (e.target === modal) { URL.revokeObjectURL(url); modal.remove(); } };
+      document.body.appendChild(modal);
+    } catch (e) {
+      console.warn('Generiranje kartice nije uspjelo:', e);
+      // Rezerva: staro dijeljenje teksta
+      const text = formatRecipeText(r);
+      if (navigator.share) {
+        try { await navigator.share({ title: r.name, text }); }
+        catch(err) { if (err.name !== 'AbortError') fallbackShare(r, text); }
+      } else fallbackShare(r, text);
     }
   }
 
@@ -1164,13 +1348,39 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     e.target.value = '';
   });
 
+  // ===== Sprječavanje gašenja ekrana dok je recept otvoren =====
+  let wakeLock = null;
+  async function omoguciWakeLock() {
+    if (!('wakeLock' in navigator)) return; // preglednik ne podržava
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (e) {
+      console.warn('Wake Lock nije uspio:', e);
+    }
+  }
+  async function otpustiWakeLock() {
+    if (wakeLock) {
+      try { await wakeLock.release(); } catch (e) {}
+      wakeLock = null;
+    }
+  }
+  // Ako se app vrati u prvi plan dok je recept otvoren, ponovno aktiviraj
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' &&
+        document.getElementById('viewModal').classList.contains('active')) {
+      omoguciWakeLock();
+    }
+  });
+
   function openModal(id) {
     document.getElementById(id).classList.add('active');
     document.body.style.overflow = 'hidden';
+    if (id === 'viewModal') omoguciWakeLock();
   }
   function closeModal(id) {
     document.getElementById(id).classList.remove('active');
     document.body.style.overflow = '';
+    if (id === 'viewModal') otpustiWakeLock();
   }
   function openDrawer() {
     document.getElementById('drawer').classList.add('active');
