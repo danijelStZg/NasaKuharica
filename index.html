@@ -710,69 +710,98 @@
   /* ===== O APLIKACIJI (popup u stilu splasha) ===== */
   #aboutScreen {
     position:fixed; inset:0; z-index:9998;
-    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    overflow:hidden; text-align:center; padding:30px;
-    opacity:0; transition:opacity 0.35s ease;
+    background:rgba(31,20,18,0.55);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; transition:opacity 0.3s ease;
   }
   #aboutScreen.show { display:flex; opacity:1; }
-  #aboutScreen::before, #aboutScreen::after {
+  #aboutScreen .popup-card {
+    position:relative; overflow:hidden;
+    width:100%; max-width:380px;
+    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
+    border-radius:26px;
+    box-shadow:0 24px 70px rgba(0,0,0,0.45);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:38px 28px;
+    transform:scale(0.92); transition:transform 0.3s cubic-bezier(0.2,0.8,0.3,1.2);
+  }
+  #aboutScreen.show .popup-card { transform:scale(1); }
+  #aboutScreen .popup-card::before, #aboutScreen .popup-card::after {
     content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,0.07);
   }
-  #aboutScreen::before { width:300px; height:300px; top:-90px; right:-90px; }
-  #aboutScreen::after { width:220px; height:220px; bottom:-60px; left:-60px; }
+  #aboutScreen .popup-card::before { width:220px; height:220px; top:-70px; right:-70px; }
+  #aboutScreen .popup-card::after { width:160px; height:160px; bottom:-50px; left:-50px; }
   #aboutScreen .logo-wrap {
-    width:108px; height:108px; border-radius:28px;
+    width:96px; height:96px; border-radius:26px;
     background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3);
-    display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+    display:flex; align-items:center; justify-content:center; margin-bottom:20px;
+    position:relative; z-index:1;
   }
-  #aboutScreen .logo-wrap .icon { font-size:54px; line-height:1; }
+  #aboutScreen .logo-wrap .icon { font-size:48px; line-height:1; }
   #aboutScreen .a-title {
-    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:40px; color:#fff; letter-spacing:0.5px;
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:#fff; letter-spacing:0.5px;
+    position:relative; z-index:1;
   }
   #aboutScreen .a-desc {
-    font-family:'Inter',sans-serif; font-size:15px; line-height:1.65;
-    color:rgba(255,255,255,0.92); max-width:360px; margin-top:16px;
+    font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.65;
+    color:rgba(255,255,255,0.92); max-width:320px; margin-top:14px;
+    position:relative; z-index:1;
   }
   #aboutScreen .a-tag {
-    font-family:'Caveat',cursive; font-size:30px; color:rgba(255,255,255,0.92); margin-top:24px;
+    font-family:'Caveat',cursive; font-size:28px; color:rgba(255,255,255,0.92); margin-top:20px;
+    position:relative; z-index:1;
   }
   #aboutScreen .a-team {
-    font-family:'Caveat',cursive; font-style:italic; font-size:24px;
-    color:rgba(255,255,255,0.82); margin-top:8px; transform:rotate(-3deg);
+    font-family:'Caveat',cursive; font-style:italic; font-size:22px;
+    color:rgba(255,255,255,0.82); margin-top:6px; transform:rotate(-3deg);
+    position:relative; z-index:1;
   }
   #aboutScreen .a-close {
-    margin-top:44px; font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
+    margin-top:34px; font-family:'Inter',sans-serif; font-size:13px; font-weight:600;
     letter-spacing:2px; text-transform:uppercase; color:#fff; cursor:pointer;
-    padding:12px 30px; border:1.5px solid rgba(255,255,255,0.5); border-radius:30px;
-    background:transparent;
+    padding:11px 28px; border:1.5px solid rgba(255,255,255,0.5); border-radius:30px;
+    background:transparent; position:relative; z-index:1;
   }
   #aboutScreen .a-close:active { background:rgba(255,255,255,0.12); }
 
-  /* ===== POTVRDNI POPUP (u stilu splasha, s dva gumba) ===== */
+  /* ===== POTVRDNI POPUP (crvena kartica u sredini, s dva gumba) ===== */
   #confirmScreen {
     position:fixed; inset:0; z-index:9998;
-    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
-    display:none; flex-direction:column; align-items:center; justify-content:center;
-    overflow:hidden; text-align:center; padding:30px;
-    opacity:0; transition:opacity 0.35s ease;
+    background:rgba(31,20,18,0.55);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; transition:opacity 0.3s ease;
   }
   #confirmScreen.show { display:flex; opacity:1; }
-  #confirmScreen::before, #confirmScreen::after {
+  #confirmScreen .popup-card {
+    position:relative; overflow:hidden;
+    width:100%; max-width:380px;
+    background:linear-gradient(160deg,#E30613 0%,#B30410 100%);
+    border-radius:26px;
+    box-shadow:0 24px 70px rgba(0,0,0,0.45);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:38px 28px;
+    transform:scale(0.92); transition:transform 0.3s cubic-bezier(0.2,0.8,0.3,1.2);
+  }
+  #confirmScreen.show .popup-card { transform:scale(1); }
+  #confirmScreen .popup-card::before, #confirmScreen .popup-card::after {
     content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,0.07);
   }
-  #confirmScreen::before { width:300px; height:300px; top:-90px; right:-90px; }
-  #confirmScreen::after { width:220px; height:220px; bottom:-60px; left:-60px; }
-  #confirmScreen .c-icon { font-size:54px; margin-bottom:18px; }
+  #confirmScreen .popup-card::before { width:220px; height:220px; top:-70px; right:-70px; }
+  #confirmScreen .popup-card::after { width:160px; height:160px; bottom:-50px; left:-50px; }
+  #confirmScreen .c-icon { font-size:50px; margin-bottom:16px; position:relative; z-index:1; }
   #confirmScreen .c-title {
-    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:#fff;
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:32px; color:#fff;
     letter-spacing:0.5px; max-width:340px;
+    position:relative; z-index:1;
   }
   #confirmScreen .c-text {
-    font-family:'Inter',sans-serif; font-size:15px; line-height:1.65;
-    color:rgba(255,255,255,0.92); max-width:360px; margin-top:16px;
+    font-family:'Inter',sans-serif; font-size:14.5px; line-height:1.65;
+    color:rgba(255,255,255,0.92); max-width:320px; margin-top:14px;
+    position:relative; z-index:1;
   }
-  #confirmScreen .c-buttons { display:flex; gap:12px; margin-top:36px; flex-wrap:wrap; justify-content:center; }
+  #confirmScreen .c-buttons { display:flex; gap:12px; margin-top:32px; flex-wrap:wrap; justify-content:center; position:relative; z-index:1; }
   #confirmScreen button {
     font-family:'Inter',sans-serif; font-size:14px; font-weight:600;
     letter-spacing:1.5px; text-transform:uppercase; cursor:pointer;
@@ -799,21 +828,25 @@
 </div>
 
 <div id="aboutScreen" onclick="if(event.target===this)closeAbout()">
-  <div class="logo-wrap"><span class="icon">🍴</span></div>
-  <div class="a-title">Naša Kuharica</div>
-  <div class="a-desc">Digitalna zbirka recepata.<br><br>Ova aplikacija nastavlja tradiciju dijeljenja recepata započetu među kolegama u Croatia banci, s ciljem očuvanja omiljenih jela i uspomena.<br><br>Recepti se pohranjuju lokalno na vašem uređaju uz mogućnost sinkronizacije putem oblaka.</div>
-  <div class="a-tag">S ljubavlju kuhano</div>
-  <div class="a-team">…od ekipe iz CB</div>
-  <button class="a-close" onclick="closeAbout()">Zatvori</button>
+  <div class="popup-card">
+    <div class="logo-wrap"><span class="icon">🍴</span></div>
+    <div class="a-title">Naša Kuharica</div>
+    <div class="a-desc">Digitalna zbirka recepata.<br><br>Ova aplikacija nastavlja tradiciju dijeljenja recepata započetu među kolegama u Croatia banci, s ciljem očuvanja omiljenih jela i uspomena.<br><br>Recepti se pohranjuju lokalno na vašem uređaju uz mogućnost sinkronizacije putem oblaka.</div>
+    <div class="a-tag">S ljubavlju kuhano</div>
+    <div class="a-team">…od ekipe iz CB</div>
+    <button class="a-close" onclick="closeAbout()">Zatvori</button>
+  </div>
 </div>
 
-<div id="confirmScreen">
-  <div class="c-icon" id="confirmIcon">⬆️</div>
-  <div class="c-title" id="confirmTitle"></div>
-  <div class="c-text" id="confirmText"></div>
-  <div class="c-buttons">
-    <button class="c-no" id="confirmNo">Odustani</button>
-    <button class="c-yes" id="confirmYes">Nastavi</button>
+<div id="confirmScreen" onclick="if(event.target===this){var n=document.getElementById('confirmNo'); if(n) n.click();}">
+  <div class="popup-card">
+    <div class="c-icon" id="confirmIcon">⬆️</div>
+    <div class="c-title" id="confirmTitle"></div>
+    <div class="c-text" id="confirmText"></div>
+    <div class="c-buttons">
+      <button class="c-no" id="confirmNo">Odustani</button>
+      <button class="c-yes" id="confirmYes">Nastavi</button>
+    </div>
   </div>
 </div>
 
