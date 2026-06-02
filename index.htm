@@ -685,6 +685,9 @@
     <div class="drawer-item" onclick="uploadAllToCloud()">
       <span class="icon">⬆️</span> Pošalji sve u oblak
     </div>
+    <div class="drawer-item" onclick="reloadFromInternet()">
+      <span class="icon">🔄</span> Ponovno učitaj app s interneta
+    </div>
     <div class="drawer-item" onclick="closeDrawer(); setTimeout(()=>alert('Naša Kuharica\n\nAplikacija za vaše recepte.\n\nRecepti se čuvaju lokalno i sinkroniziraju preko oblaka.'), 100)">
       <span class="icon">ℹ️</span> O aplikaciji
     </div>
@@ -1273,6 +1276,30 @@
       console.warn('Brisanje iz oblaka nije uspjelo:', e);
       showToast('Greška pri brisanju iz oblaka');
     }
+  }
+
+  // Prisilno povuče najnoviju verziju app s interneta.
+  // Briše SAMO cache app datoteka — recepti (localStorage) ostaju netaknuti.
+  async function reloadFromInternet() {
+    closeDrawer();
+    if (!confirm('Ponovno učitati aplikaciju s interneta?\n\nPovlači se najnovija verzija app.\nVaši recepti ostaju sačuvani.')) return;
+    showToast('Učitavam najnoviju verziju...');
+    try {
+      // 1. Obriši sve cache verzije
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      // 2. Odjavi service worker da se ponovno instalira čist
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+    } catch (e) {
+      console.warn('Čišćenje cache-a nije u potpunosti uspjelo:', e);
+    }
+    // 3. Ponovno učitaj zaobilazeći cache
+    window.location.reload(true);
   }
 
   loadRecipes();
