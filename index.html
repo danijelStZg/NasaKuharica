@@ -1691,10 +1691,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   }
 
   // Provjerava oblak i skida samo nove ili novije recepte
-  async function checkCloud() {
-    closeDrawer();
-    if (!cloudReady()) return;
-    showToast('Provjeravam oblak...');
+  async function checkCloud(tiho = false) {
+    if (!tiho) closeDrawer();
+    if (!window.fb || !window.fb.db) {
+      if (!tiho) showToast('Oblak još nije spreman, pokušajte za koji trenutak');
+      return;
+    }
+    if (!tiho) showToast('Provjeravam oblak...');
     try {
       const { db, collection, getDocs } = window.fb;
       const snap = await getDocs(collection(db, 'recepti'));
@@ -1726,12 +1729,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         if (added) msg.push(`${added} novih`);
         if (updated) msg.push(`${updated} ažurirano`);
         showToast('Preuzeto: ' + msg.join(', '));
-      } else {
+      } else if (!tiho) {
         showToast('Već imate sve recepte');
       }
     } catch (e) {
       console.warn('Provjera oblaka nije uspjela:', e);
-      showToast('Greška pri spajanju na oblak');
+      if (!tiho) showToast('Greška pri spajanju na oblak');
     }
   }
 
@@ -1914,8 +1917,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   // Zaključaj skrolanje dok je splash prikazan
   if (document.getElementById('splash')) document.body.style.overflow = 'hidden';
 
-  // Tiha sinkronizacija nakon što se Firebase učita (šalje nove/izmijenjene)
-  setTimeout(() => { tihaSinkronizacija(); }, 3000);
+  // Pri pokretanju (kad ima interneta): prvo tiho povuci nove/izmijenjene
+  // iz oblaka (uz kratku poruku ako ima novosti), zatim tiho pošalji svoje.
+  setTimeout(async () => {
+    await checkCloud(true);   // tiho povlačenje + toast samo ako ima novog
+    await tihaSinkronizacija(); // tiho slanje novih/izmijenjenih
+  }, 3000);
 
   loadRecipes();
   renderList();
