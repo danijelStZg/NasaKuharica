@@ -823,6 +823,33 @@
     background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.5);
   }
   #confirmScreen .c-no:active { background:rgba(255,255,255,0.12); }
+
+  /* Popis novih recepata unutar popupa */
+  #confirmScreen .c-list {
+    position:relative; z-index:1;
+    width:100%; max-width:320px; margin-top:18px;
+    max-height:46vh; overflow-y:auto;
+    display:flex; flex-direction:column; gap:8px;
+    text-align:left;
+  }
+  #confirmScreen .c-list .c-row {
+    background:rgba(255,255,255,0.14);
+    border:1px solid rgba(255,255,255,0.22);
+    border-radius:12px; padding:11px 14px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  #confirmScreen .c-list .c-name {
+    font-family:'Cormorant Garamond',serif; font-weight:700; font-size:19px; color:#fff;
+    line-height:1.15;
+  }
+  #confirmScreen .c-list .c-cat {
+    flex-shrink:0;
+    font-family:'Inter',sans-serif; font-size:10px; font-weight:600;
+    letter-spacing:0.5px; text-transform:uppercase;
+    color:#fff; background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.3);
+    padding:4px 9px; border-radius:20px;
+  }
 </style>
 </head>
 <body>
@@ -1702,6 +1729,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       const { db, collection, getDocs } = window.fb;
       const snap = await getDocs(collection(db, 'recepti'));
       let added = 0, updated = 0;
+      const noviRecepti = []; // {name, category, izmjena:bool}
       snap.forEach(docSnap => {
         const cloud = docSnap.data();
         if (!cloud || !cloud.id) return;
@@ -1711,6 +1739,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
           cloud.syncedAt = cloud.updated || cloud.created || Date.now();
           recipes.push(cloud);
           added++;
+          noviRecepti.push({ name: cloud.name || 'Bez naziva', category: cloud.category || '', izmjena: false });
         } else {
           // postoji - ažuriraj samo ako je verzija u oblaku novija
           const localT = recipes[idx].updated || recipes[idx].created || 0;
@@ -1719,16 +1748,33 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             cloud.syncedAt = cloudT;
             recipes[idx] = cloud;
             updated++;
+            noviRecepti.push({ name: cloud.name || 'Bez naziva', category: cloud.category || '', izmjena: true });
           }
         }
       });
       if (added || updated) {
         saveRecipes();
         renderList();
-        let msg = [];
-        if (added) msg.push(`${added} novih`);
-        if (updated) msg.push(`${updated} ažurirano`);
-        showToast('Preuzeto: ' + msg.join(', '));
+        if (tiho) {
+          // Vidljiva obavijest s popisom (samo pri automatskom povlačenju)
+          const redovi = noviRecepti.map(r =>
+            `<div class="c-row"><span class="c-name">${escapeHtml(r.name)}${r.izmjena ? ' <span style="font-size:12px;opacity:0.75;">(ažurirano)</span>' : ''}</span>` +
+            (r.category ? `<span class="c-cat">${escapeHtml(r.category)}</span>` : '') +
+            `</div>`
+          ).join('');
+          const naslov = noviRecepti.length === 1 ? 'Novi recept' : 'Novi recepti';
+          await splashInfo({
+            icon: '📖',
+            title: naslov,
+            html: `<div class="c-list">${redovi}</div>`,
+            ok: 'U redu'
+          });
+        } else {
+          let msg = [];
+          if (added) msg.push(`${added} novih`);
+          if (updated) msg.push(`${updated} ažurirano`);
+          showToast('Preuzeto: ' + msg.join(', '));
+        }
       } else if (!tiho) {
         showToast('Već imate sve recepte');
       }
@@ -1856,6 +1902,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
       }
       btnYes.onclick = () => zatvori(true);
       btnNo.onclick = () => zatvori(false);
+    });
+  }
+
+  // Informativni popup s jednim gumbom (u istom stilu)
+  function splashInfo({ icon = 'ℹ️', title = '', html = '', ok = 'U redu' }) {
+    return new Promise((resolve) => {
+      const screen = document.getElementById('confirmScreen');
+      document.getElementById('confirmIcon').textContent = icon;
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmText').innerHTML = html;
+      const btnYes = document.getElementById('confirmYes');
+      const btnNo = document.getElementById('confirmNo');
+      btnYes.textContent = ok;
+      btnNo.style.display = 'none';            // sakrij drugi gumb
+      screen.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      function zatvori() {
+        screen.classList.remove('show');
+        document.body.style.overflow = '';
+        btnYes.onclick = null;
+        btnNo.style.display = '';               // vrati za buduće potvrde
+        resolve(true);
+      }
+      btnYes.onclick = zatvori;
     });
   }
 
